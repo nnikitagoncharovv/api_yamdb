@@ -1,6 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework import filters, mixins, permissions, viewsets
+from rest_framework import filters, viewsets
 
 from rest_framework.pagination import PageNumberPagination
 
@@ -37,7 +37,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filterset_fields = ('category', 'genre',
                         'name', 'year')
-    
+
     def get_serializer_class(self):
         if self.action == 'list' or 'retrive':
             return TitleRetriveSerializer

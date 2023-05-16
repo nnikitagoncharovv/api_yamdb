@@ -1,5 +1,6 @@
-from audioop import avg
 import datetime as dt
+
+from audioop import avg
 
 from rest_framework import serializers
 
@@ -30,24 +31,23 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'description',
                   'genre', 'category')
-        
+    
     def get_year(self, obj):
         return dt.datetime.now().year - obj.year
 
 
-
 class TitleRetriveSerializer(serializers.ModelSerializer):
-#    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.SerializerMethodField(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description',
-                  'genre', 'category')  # 'rating'
-        
-#    def get_rating(self, obj):
-#        rate = obj.reviews.aggregate(rating=Avg('score'))
-#        if not rate['rating']:
-#            return None
-#        return int(rate['rating'])
+        fields = ('id', 'name', 'year', 'rating'
+                  'description', 'genre', 'category')
+
+    def get_rating(self, obj):
+        rate = obj.reviews.aggregate(rating=avg('score'))
+        if not rate['rating']:
+            return None
+        return int(rate['rating'])
