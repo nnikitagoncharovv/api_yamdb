@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'api.apps.ApiConfig',
     'users',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +47,7 @@ TEMPLATES_DIR = BASE_DIR / 'templates'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,7 +68,7 @@ WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': str(os.path.join(BASE_DIR, "db.sqlite3")),
     }
 }
 
@@ -144,3 +145,4 @@ LIMIT_CODE = 256
 LIMIT_EMAIL = 254
 
 LIMIT_ROLE = 25
+
