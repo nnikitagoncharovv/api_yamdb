@@ -14,7 +14,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
-from .permissions import (IsAdminOrSuperUser, IsAuthenticatedOrReadOnly,
+from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperUser,
+                          IsAuthenticatedOrReadOnly,
                           IsStaffOrAuthorOrReadOnly)
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, RegistrationSerializer,
@@ -67,7 +68,8 @@ class CategoryViewSet(mixins.CreateModelMixin,
                       viewsets.GenericViewSet,):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (AllowAny,)
+    lookup_field = 'slug'
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ('name',)
@@ -75,10 +77,12 @@ class CategoryViewSet(mixins.CreateModelMixin,
 
 class GenreViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
+                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet,):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AllowAny,)
+    lookup_field = 'slug'
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ('name',)
@@ -87,7 +91,7 @@ class GenreViewSet(mixins.CreateModelMixin,
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = PageNumberPagination
     filterset_fields = ('category', 'genre',
