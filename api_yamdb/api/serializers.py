@@ -12,6 +12,7 @@ from users.models import User
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализует запросы к отзывам"""
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username',
     )
@@ -28,6 +29,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализует запросы к коментариям"""
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username'
     )
@@ -38,18 +40,21 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализует запросы к категориям"""
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализует запросы к жанрам."""
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализует запросы к произведниям на изменение."""
     genre = serializers.PrimaryKeyRelatedField(
         queryset=Genre.objects.all(), required=False, many=True)
     category = serializers.PrimaryKeyRelatedField(
@@ -61,10 +66,14 @@ class TitleSerializer(serializers.ModelSerializer):
                   'genre', 'category')
 
     def get_year(self, obj):
-        return dt.datetime.now().year - obj.year
-
+        if obj.year > dt.datetime.now().year:
+            raise serializers.ValidationError(
+                'Произведение не может быть из будущего!')
+        return obj.year
+    
 
 class TitleRetriveSerializer(serializers.ModelSerializer):
+    """Сериализует запросы к произведниям."""
     rating = serializers.SerializerMethodField(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
