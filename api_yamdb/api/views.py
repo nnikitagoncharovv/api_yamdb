@@ -10,9 +10,11 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from django.db.utils import IntegrityError
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from .filters import TitleFilter
 
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperUser,
                           IsAuthenticatedOrReadOnly,
@@ -39,6 +41,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         return title.reviews.all()
+
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError:
+            return Response({"success": False}, status=400)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -94,11 +102,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = PageNumberPagination
-    filterset_fields = ('category', 'genre',
-                        'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if self.action == 'list' or 'retrive':
+        if self.action in ('retrieve', 'list'):
             return TitleRetriveSerializer
         return TitleSerializer
 

@@ -20,12 +20,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ('author', 'id', 'pub_date', 'text', 'score')
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'title', ],
-                name='unique'
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -55,10 +49,13 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
-    genre = serializers.PrimaryKeyRelatedField(
-        queryset=Genre.objects.all(), required=False, many=True)
-    category = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(), required=False)
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        required=False, many=True,
+        slug_field='slug'
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(), required=False, slug_field='slug')
 
     class Meta:
         model = Title
@@ -70,7 +67,7 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Произведение не может быть из будущего!')
         return obj.year
-    
+
 
 class TitleRetriveSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям."""
