@@ -6,7 +6,7 @@ from users.models import User
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=256)
+    name = models.CharField('Категория', max_length=256)
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -15,13 +15,15 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField('Жанр', max_length=20)
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -30,21 +32,25 @@ class Genre(models.Model):
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
+    name = models.CharField('Произведение', max_length=256)
+    year = models.IntegerField('Дата издания',)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name='titles', null=True)
     genre = models.ManyToManyField(Genre, through='TitleGenre')
-    description = models.TextField(max_length=256, blank=True, null=True)
+    description = models.TextField('Описание', max_length=256, blank=True, null=True)
 
     class Meta:
         ordering = ['name']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
         return self.name
