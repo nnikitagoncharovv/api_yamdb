@@ -45,7 +45,12 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name='titles', null=True)
     genre = models.ManyToManyField(Genre, through='TitleGenre')
-    description = models.TextField('Описание', max_length=256, blank=True, null=True)
+    description = models.TextField(
+        'Описание',
+        max_length=256,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         ordering = ['name']
