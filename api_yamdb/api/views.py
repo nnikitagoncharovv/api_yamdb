@@ -10,6 +10,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 from reviews.models import Category, Genre, Review, Title
@@ -112,17 +113,27 @@ def registration(request):
     """Регистрация пользователя"""
     serializer = RegistrationSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = serializer.data['username']
-    email = serializer.data['email']
-    user, _ = User.objects.get_or_create(
-        username=username,
-        email=email)
-    confirmation_code = default_token_generator.make_token(user)
+    username = serializer.validated_data['username']
+    email = serializer.validated_data['email']
+    with_email = User.objects.filter(email=email).first()
+    with_username = User.objects.filter(username=username).first()
+    if with_email:
+        if with_email.username != username:
+            raise ValidationError("пользователь с таким email уже существует")
+    if with_username:
+        if with_username.email != email:
+            raise ValidationError("пользователь с таким username"
+                                  "уже существует")
+    current = User.objects.filter(email=email, username=username).first()
+    if not current:
+        serializer.save()
+        current = User.objects.filter(email=email, username=username).first()
+    confirmation_code = default_token_generator.make_token(current)
     send_mail(
         subject='Регистрация на сайте YaMDb',
         message=f'Ваш код подтверждения: {confirmation_code}',
         from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[user.email]
+        recipient_list=[email]
     )
     return Response(serializer.data, status=status.HTTP_200_OK)
 

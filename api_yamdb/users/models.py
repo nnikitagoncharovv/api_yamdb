@@ -39,7 +39,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=128, choices=ROLES, default=USER_ROLE)
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['-username']
 
     @property
     def is_admin(self):

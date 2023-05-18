@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import IntegrityError
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -86,7 +87,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     """Сериализует запросы на регистрацию."""
     username = serializers.RegexField(
         max_length=settings.LIMIT_USERNAME,
-        regex=r'^[\w.@+-]+\Z',
+        regex=r'^((?!me).)[\w.@+-]+\Z',
         required=True
     )
     email = serializers.EmailField(
@@ -94,36 +95,23 @@ class RegistrationSerializer(serializers.ModelSerializer):
         required=True,
     )
 
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise serializers.ValidationError('Использовать имя me запрещено!')
-        return value
-
     class Meta:
         fields = ('username', 'email')
         model = User
 
-    def validate(self, validated_data):
-        username = validated_data['username']
-        email = validated_data['email']
-        try:
-            user, _ = User.objects.get_or_create(username=username,
-                                                 email=email)
-        except IntegrityError:
-            raise serializers.ValidationError('Это имя или email уже занято')
-        return validated_data
+
+class MyValidator(UnicodeUsernameValidator):
+    regex = r'^[\w.@+-]+\Z'
+    queryset = User.objects.all()
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.RegexField(
+    username = serializers.CharField(
         max_length=settings.LIMIT_USERNAME,
-        regex=r'^[\w.@+-]+\Z',
+        validators=[MyValidator()],
         required=True)
     confirmation_code = serializers.CharField(
         required=True)
-
-    class Meta:
-        fields = ('username', 'confirmation_code')
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -133,6 +121,7 @@ class UserSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]+\Z',
         required=True,
         validators=[
+            # Исправить по замечанию не получилось https://github.com/encode/django-rest-framework/issues/7173
             UniqueValidator(queryset=User.objects.all())
         ])
     email = serializers.EmailField(
@@ -148,10 +137,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
 
-
 class UserEditSerializer(UserSerializer):
 
-  
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
