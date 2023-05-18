@@ -45,6 +45,8 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+# Используется только для сохранения заголовков.
+# Функционал отображения реализован в TitleRetriveSerializer
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
     genre = serializers.SlugRelatedField(
@@ -146,8 +148,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
 
+
 class UserEditSerializer(UserSerializer):
 
+  
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
