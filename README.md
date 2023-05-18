@@ -7,7 +7,7 @@ YaMDb - API-сервис для публикации отзывов пользо
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone git@github.com:Anton-Kim/api_yamdb.git
+git clone git@github.com:nnikitagoncharovv/api_yamdb.git
 ```
 
 Cоздать и активировать виртуальное окружение:
