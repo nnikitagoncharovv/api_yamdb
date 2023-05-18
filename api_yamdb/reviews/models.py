@@ -71,7 +71,7 @@ class Review(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(10)]
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    text = models.CharField(max_length=500)
+    text = models.TextField()
 
     class Meta:
         ordering = ('pub_date',)
@@ -92,7 +92,7 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='comments')
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-    text = models.CharField(max_length=500)
+    text = models.TextField()
 
     class Meta:
         ordering = ('pub_date',)
