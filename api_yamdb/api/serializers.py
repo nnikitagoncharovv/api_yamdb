@@ -46,6 +46,8 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
+# Используется только для сохранения заголовков.
+# Функционал отображения реализован в TitleRetriveSerializer
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
     genre = serializers.SlugRelatedField(
@@ -102,19 +104,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         fields = ('username', 'email')
         model = User
 
-    def validate_empty(self, data):
-        username = data.get('username')
-        email = data.get('email')
-        if not username:
-            raise serializers.ValidationError(
-                'Имя пользователя не может быть пустым'
-            )
-        if not email:
-            raise serializers.ValidationError(
-                'Email не может быть пустым'
-            )
-        return data
-
     def validate(self, validated_data):
         username = validated_data['username']
         email = validated_data['email']
@@ -160,19 +149,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         model = User
-
-    def validate_empty(self, data):
-        username = data.get('username')
-        email = data.get('email')
-        if not username:
-            raise serializers.ValidationError(
-                'Имя пользователя не может быть пустым'
-            )
-        if not email:
-            raise serializers.ValidationError(
-                'Email не может быть пустым'
-            )
-        return data
 
 
 class UserEditSerializer(serializers.ModelSerializer):
