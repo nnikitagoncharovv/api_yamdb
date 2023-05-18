@@ -25,7 +25,7 @@ class User(AbstractUser):
             'unique': "A user with that username already exists.",
         },
     )
-    email = models.CharField(
+    email = models.EmailField(
         max_length=254,
         unique=True,
         help_text='Required. 254 characters or fewer.',
@@ -36,7 +36,7 @@ class User(AbstractUser):
     )
 
     bio = models.TextField(blank=True, null=True)
-    role = models.CharField(max_length=32, choices=ROLES, default=USER_ROLE)
+    role = models.CharField(max_length=128, choices=ROLES, default=USER_ROLE)
 
     class Meta:
         ordering = ['-id']

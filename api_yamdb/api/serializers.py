@@ -1,8 +1,7 @@
 import datetime as dt
 
 from django.conf import settings
-from django.db import IntegrityError, models
-from django.forms import IntegerField
+from django.db import IntegrityError
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -121,12 +120,10 @@ class TokenSerializer(serializers.Serializer):
         regex=r'^[\w.@+-]+\Z',
         required=True)
     confirmation_code = serializers.CharField(
-        max_length=settings.LIMIT_CODE,
         required=True)
 
     class Meta:
         fields = ('username', 'confirmation_code')
-        model = User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -151,18 +148,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
 
-class UserEditSerializer(serializers.ModelSerializer):
-    username = serializers.RegexField(
-        max_length=settings.LIMIT_USERNAME,
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())])
-    email = serializers.EmailField(
-        max_length=settings.LIMIT_EMAIL,
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ])
 
+class UserEditSerializer(UserSerializer):
+
+  
     class Meta:
         fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
