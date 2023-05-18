@@ -2,6 +2,7 @@ import datetime as dt
 
 from django.conf import settings
 from django.db import IntegrityError, models
+from django.forms import IntegerField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -60,16 +61,17 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'description',
                   'genre', 'category')
 
-    def get_year(self, obj):
-        if obj.year > dt.datetime.now().year:
+    def validate_year(self, value):
+        year = dt.date.today().year
+        if value > year:
             raise serializers.ValidationError(
                 'Произведение не может быть из будущего!')
-        return obj.year
+        return value
 
 
 class TitleRetriveSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям."""
-    rating = serializers.SerializerMethodField(read_only=True)
+    rating = serializers.IntegerField(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -77,12 +79,6 @@ class TitleRetriveSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                                         'description', 'genre', 'category')
-
-    def get_rating(self, obj):
-        rate = obj.reviews.aggregate(rating=models.Avg('score'))
-        if not rate['rating']:
-            return None
-        return int(rate['rating'])
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

@@ -3,6 +3,9 @@ from datetime import timedelta
 from pathlib import Path
 
 
+MAX_NAME=256
+MAX_SLUG=50
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -93,7 +96,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
