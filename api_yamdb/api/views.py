@@ -96,13 +96,13 @@ class TitleViewSet(PutNoViewSet):
     search_fields = ('name',)
 
     def get_serializer_class(self):
-        if self.action == 'retrieve' or 'list':
+        if self.action in ('retrieve', 'list'):
             return TitleRetriveSerializer
         return TitleSerializer
 
     def get_queryset(self):
         new_queryset = Title.objects.annotate(
-            rating=Avg('reviews__score')).all()
+            rating=Avg('reviews__score')).all().order_by('pk')
         return new_queryset
 
 
