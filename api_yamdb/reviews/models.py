@@ -1,17 +1,13 @@
-from django.core.validators import (RegexValidator,
-                                    MaxValueValidator, MinValueValidator)
+from django.core.validators import (MaxValueValidator, MinValueValidator)
 from django.db import models
 
+from api_yamdb.settings import MAX_NAME, MAX_SLUG
 from users.models import User
 
 
 class Category(models.Model):
-    name = models.CharField('Категория', max_length=256)
-    slug = models.SlugField(
-        max_length=50,
-        unique=True,
-        validators=[RegexValidator(regex=r'^[-a-zA-Z0-9_]+$')]
-    )
+    name = models.CharField('Категория', max_length=MAX_NAME)
+    slug = models.SlugField('ID категории', max_length=MAX_SLUG, unique=True)
 
     class Meta:
         ordering = ['name']
@@ -23,12 +19,8 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField('Жанр', max_length=20)
-    slug = models.SlugField(
-        max_length=50,
-        unique=True,
-        validators=[RegexValidator(regex=r'^[-a-zA-Z0-9_]+$')]
-    )
+    name = models.CharField('Жанр', max_length=MAX_NAME)
+    slug = models.SlugField('ID жанра', max_length=MAX_SLUG, unique=True)
 
     class Meta:
         ordering = ['name']
@@ -40,17 +32,12 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    name = models.CharField('Произведение', max_length=256)
+    name = models.CharField('Произведение', max_length=MAX_NAME)
     year = models.IntegerField('Дата издания',)
     category = models.ForeignKey(
         Category, on_delete=models.SET_NULL, related_name='titles', null=True)
     genre = models.ManyToManyField(Genre, through='TitleGenre')
-    description = models.TextField(
-        'Описание',
-        max_length=256,
-        blank=True,
-        null=True
-    )
+    description = models.TextField('Описание', blank=True, null=True)
 
     class Meta:
         ordering = ['name']
