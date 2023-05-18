@@ -1,7 +1,6 @@
 import datetime as dt
 
 from django.conf import settings
-from django.db import IntegrityError
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -121,7 +120,8 @@ class UserSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]+\Z',
         required=True,
         validators=[
-            # Исправить по замечанию не получилось https://github.com/encode/django-rest-framework/issues/7173
+            # Исправить по замечанию не получилось
+            # https://github.com/encode/django-rest-framework/issues/7173
             UniqueValidator(queryset=User.objects.all())
         ])
     email = serializers.EmailField(

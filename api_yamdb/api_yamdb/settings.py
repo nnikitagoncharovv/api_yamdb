@@ -3,8 +3,8 @@ from datetime import timedelta
 from pathlib import Path
 
 
-MAX_NAME=256
-MAX_SLUG=50
+MAX_NAME = 256
+MAX_SLUG = 50
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

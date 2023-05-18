@@ -1,9 +1,12 @@
 from rest_framework import mixins, viewsets
 
-class CLDslugViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet,):
+
+class CLDslugViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     lookup_field = 'slug'
 
 
