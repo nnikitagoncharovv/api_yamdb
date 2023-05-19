@@ -46,6 +46,11 @@ python manage.py migrate
 ```
 python manage.py runserver
 ```
+Импортировать данные из CSV-файлов в БД:
+
+```
+python manage.py import_data_csv
+```
 
 ```
 Примеры запросов:
