@@ -45,8 +45,6 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-# Используется только для сохранения заголовков.
-# Функционал отображения реализован в TitleRetriveSerializer
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
     genre = serializers.SlugRelatedField(
@@ -55,7 +53,9 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug'
     )
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(), required=False, slug_field='slug')
+        queryset=Category.objects.all(),
+        required=False, many=True,
+        slug_field='slug')
 
     class Meta:
         model = Title
