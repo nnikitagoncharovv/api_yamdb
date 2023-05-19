@@ -2,7 +2,6 @@ import datetime as dt
 
 from django.conf import settings
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title
@@ -115,21 +114,6 @@ class TokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализует данные пользователя."""
-    username = serializers.RegexField(
-        max_length=settings.LIMIT_USERNAME,
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        validators=[
-            # Исправить по замечанию не получилось
-            # https://github.com/encode/django-rest-framework/issues/7173
-            UniqueValidator(queryset=User.objects.all())
-        ])
-    email = serializers.EmailField(
-        max_length=settings.LIMIT_EMAIL,
-        validators=[
-            UniqueValidator(queryset=User.objects.all())
-        ]
-    )
 
     class Meta:
         fields = ('username', 'email', 'first_name',
