@@ -52,10 +52,10 @@ class TitleSerializer(serializers.ModelSerializer):
         required=False, many=True,
         slug_field='slug'
     )
-    category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        required=False, many=True,
-        slug_field='slug')
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            required=False,
+                                            slug_field='slug'
+                                            )
 
     class Meta:
         model = Title

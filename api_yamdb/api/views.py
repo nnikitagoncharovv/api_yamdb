@@ -16,7 +16,7 @@ from django.db.utils import IntegrityError
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 from .filters import TitleFilter
-from .custom_viewset import CLDslugViewSet, PutNoViewSet
+from .viewsets import CLDslugViewSet, PutNoViewSet
 
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperUser,
                           IsAuthenticatedOrReadOnly,
@@ -32,9 +32,6 @@ class ReviewViewSet(PutNoViewSet):
     serializer_class = ReviewSerializer
     http_method_names = ['get', 'post', 'delete', 'patch']
     permission_classes = [IsStaffOrAuthorOrReadOnly]
-
-    def get_permissions(self):
-        return (IsStaffOrAuthorOrReadOnly(),)
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
