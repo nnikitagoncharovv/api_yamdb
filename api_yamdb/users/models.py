@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.validators import validate_email
 from django.db import models
 
 USER_ROLE = 'user'
@@ -26,10 +25,8 @@ class User(AbstractUser):
         },
     )
     email = models.EmailField(
-        max_length=254,
         unique=True,
         help_text='Required. 254 characters or fewer.',
-        validators=[validate_email],
         error_messages={
             'unique': "A user with that email already exists.",
         },
