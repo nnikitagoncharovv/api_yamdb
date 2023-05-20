@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.validators import UnicodeUsernameValidator
 
-from reviews.models import Category, Comment, Genre, Review, Title, TitleGenre
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
@@ -47,7 +47,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
-    
+
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         required=False, many=True,
@@ -69,17 +69,17 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Произведение не может быть из будущего!')
         return value
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['category'] = CategorySerializer(
-                    instance=instance.category, read_only=True
-                ).data
+            instance=instance.category, read_only=True
+        ).data
         representation["genre"] = GenreSerializer(
-                   instance=instance.genre, read_only=True, many=True
-                ).data
+            instance=instance.genre, read_only=True, many=True
+        ).data
         return representation
-    
+
 
 class TitleRetriveSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям."""
