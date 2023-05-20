@@ -1,6 +1,7 @@
 import datetime as dt
 
 from django.conf import settings
+from django.core.validators import RegexValidator
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -95,10 +96,15 @@ class TitleRetriveSerializer(serializers.ModelSerializer):
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Сериализует запросы на регистрацию."""
-    username = serializers.RegexField(
-        max_length=settings.LIMIT_USERNAME,
-        regex=r'^((?!me).)[\w.@+-]+\Z',
-        required=True
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            UnicodeUsernameValidator(),
+            RegexValidator(
+                regex=r'^(?!me$).*$',
+                message='Использовать "me" в качестве username запрещено',
+            ),
+        ],
     )
     email = serializers.EmailField(
         max_length=settings.LIMIT_EMAIL,
@@ -110,15 +116,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = User
 
 
-class MyValidator(UnicodeUsernameValidator):
-    regex = r'^[\w.@+-]+\Z'
-    queryset = User.objects.all()
-
-
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=settings.LIMIT_USERNAME,
-        validators=[MyValidator()],
+        validators=[UnicodeUsernameValidator()],
         required=True)
     confirmation_code = serializers.CharField(
         required=True)
@@ -126,6 +127,26 @@ class TokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализует данные пользователя."""
+
+    username = serializers.CharField(
+        max_length=settings.LIMIT_USERNAME,
+        required=True,
+        validators=[
+            UnicodeUsernameValidator(),
+            RegexValidator(
+                regex=r'^(?!me$).*$',
+                message='Использовать "me" в качестве username запрещено',
+            ),
+            UniqueValidator(queryset=User.objects.all())
+        ],
+        
+    )
+    email = serializers.EmailField(
+        max_length=settings.LIMIT_EMAIL,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ]
+    )
 
     class Meta:
         fields = ('username', 'email', 'first_name',
