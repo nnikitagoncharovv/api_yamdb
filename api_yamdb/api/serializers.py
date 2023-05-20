@@ -1,9 +1,12 @@
 import datetime as dt
 
 from django.conf import settings
+from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from rest_framework.validators import UniqueValidator
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -14,6 +17,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username',
     )
+
+    def validate(self, data):
+        author = self.context['request'].user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if self.context['request'].method == 'POST':
+            current = Review.objects.filter(author=author, title_id=title_id)
+            if current.first():
+                raise ValidationError("Запрещено оставлять два отзыва на одно"
+                                      "произведение!")
+        return data
 
     class Meta:
         model = Review
@@ -56,7 +69,12 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(),
         required=False,
-        slug_field='slug')
+        slug_field='slug'
+    )
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            required=False,
+                                            slug_field='slug'
+                                            )
 
     class Meta:
         model = Title
@@ -95,10 +113,15 @@ class TitleRetriveSerializer(serializers.ModelSerializer):
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Сериализует запросы на регистрацию."""
-    username = serializers.RegexField(
-        max_length=settings.LIMIT_USERNAME,
-        regex=r'^((?!me).)[\w.@+-]+\Z',
-        required=True
+    username = serializers.CharField(
+        max_length=150,
+        validators=[
+            UnicodeUsernameValidator(),
+            RegexValidator(
+                regex=r'^(?!me$).*$',
+                message='Использовать "me" в качестве username запрещено',
+            ),
+        ],
     )
     email = serializers.EmailField(
         max_length=settings.LIMIT_EMAIL,
@@ -110,15 +133,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = User
 
 
-class MyValidator(UnicodeUsernameValidator):
-    regex = r'^[\w.@+-]+\Z'
-    queryset = User.objects.all()
-
-
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=settings.LIMIT_USERNAME,
-        validators=[MyValidator()],
+        validators=[UnicodeUsernameValidator()],
         required=True)
     confirmation_code = serializers.CharField(
         required=True)
@@ -126,15 +144,20 @@ class TokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализует данные пользователя."""
-    username = serializers.RegexField(
+
+    username = serializers.CharField(
         max_length=settings.LIMIT_USERNAME,
-        regex=r'^[\w.@+-]+\Z',
         required=True,
         validators=[
-            # Исправить по замечанию не получилось
-            # https://github.com/encode/django-rest-framework/issues/7173
+            UnicodeUsernameValidator(),
+            RegexValidator(
+                regex=r'^(?!me$).*$',
+                message='Использовать "me" в качестве username запрещено',
+            ),
             UniqueValidator(queryset=User.objects.all())
-        ])
+        ],
+        
+    )
     email = serializers.EmailField(
         max_length=settings.LIMIT_EMAIL,
         validators=[

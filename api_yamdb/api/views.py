@@ -4,19 +4,18 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.exceptions import ValidationError
-from django.db.utils import IntegrityError
 
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 from .filters import TitleFilter
-from .custom_viewset import CLDslugViewSet, PutNoViewSet
+from .viewsets import CLDslugViewSet, PutNoViewSet
 
 from .permissions import (IsAdminOrReadOnly, IsAdminOrSuperUser,
                           IsAuthenticatedOrReadOnly,
@@ -33,9 +32,6 @@ class ReviewViewSet(PutNoViewSet):
     http_method_names = ['get', 'post', 'delete', 'patch']
     permission_classes = [IsStaffOrAuthorOrReadOnly]
 
-    def get_permissions(self):
-        return (IsStaffOrAuthorOrReadOnly(),)
-
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
@@ -44,12 +40,6 @@ class ReviewViewSet(PutNoViewSet):
 
     def get_queryset(self):
         return self.get_title().reviews.all()
-
-    def create(self, request, *args, **kwargs):
-        try:
-            return super().create(request, *args, **kwargs)
-        except IntegrityError:
-            return Response({"success": False}, status=400)
 
 
 class CommentViewSet(PutNoViewSet):
@@ -73,8 +63,6 @@ class CommentViewSet(PutNoViewSet):
 class CategoryViewSet(CLDslugViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
     pagination_class = PageNumberPagination
     search_fields = ('name',)
 
@@ -82,10 +70,6 @@ class CategoryViewSet(CLDslugViewSet):
 class GenreViewSet(CLDslugViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    pagination_class = PageNumberPagination
-    search_fields = ('name',)
 
 
 class TitleViewSet(PutNoViewSet):
@@ -94,17 +78,13 @@ class TitleViewSet(PutNoViewSet):
     filter_backends = (DjangoFilterBackend,)
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
-    search_fields = ('name',)
+    queryset = Title.objects.all()
+    search_fields = ('name', 'queryset')
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
             return TitleRetriveSerializer
         return TitleSerializer
-
-    def get_queryset(self):
-        new_queryset = Title.objects.annotate(
-            rating=Avg('reviews__score')).all().order_by('pk')
-        return new_queryset
 
 
 @api_view(['POST'])
