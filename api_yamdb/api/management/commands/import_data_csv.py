@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         model.objects.create(**row)
                 self.stdout.write(
                     self.style.SUCCESS(
-                    f'Данные из файла {csv_file} импортированы'
+                    f'Данные из файла {csv_file} импортированы '
                     f'в БД {model.__name__}.'
                     )
                 )
