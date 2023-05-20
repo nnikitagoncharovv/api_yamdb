@@ -5,6 +5,7 @@ from django.core.validators import RegexValidator
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from rest_framework.validators import UniqueValidator
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
