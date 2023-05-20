@@ -39,6 +39,12 @@ class Title(models.Model):
     genre = models.ManyToManyField(Genre, through='TitleGenre')
     description = models.TextField('Описание', blank=True, null=True)
 
+    @property
+    def rating(self):
+        return self.reviews.aggregate(
+            models.Avg('score')
+        )['score__avg']
+
     class Meta:
         ordering = ['name']
         verbose_name = 'Произведение'

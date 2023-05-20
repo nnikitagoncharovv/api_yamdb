@@ -2,7 +2,9 @@ import datetime as dt
 
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -13,6 +15,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username',
     )
+
+    def validate(self, data):
+        author = self.context['request'].user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if self.context['request'].method == 'POST':
+            current = Review.objects.filter(author=author, title_id=title_id)
+            if current.first():
+                raise ValidationError("Запрещено оставлять два отзыва на одно"
+                                      "произведение!")
+        return data
 
     class Meta:
         model = Review
