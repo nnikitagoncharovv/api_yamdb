@@ -60,9 +60,15 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализует запросы к произведниям на изменение."""
+
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         required=False, many=True,
+        slug_field='slug')
+
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        required=False,
         slug_field='slug'
     )
     category = serializers.SlugRelatedField(queryset=Category.objects.all(),
@@ -81,6 +87,16 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Произведение не может быть из будущего!')
         return value
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['category'] = CategorySerializer(
+            instance=instance.category, read_only=True
+        ).data
+        representation["genre"] = GenreSerializer(
+            instance=instance.genre, read_only=True, many=True
+        ).data
+        return representation
 
 
 class TitleRetriveSerializer(serializers.ModelSerializer):
