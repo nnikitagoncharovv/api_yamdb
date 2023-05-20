@@ -3,8 +3,9 @@ import datetime as dt
 from django.conf import settings
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
@@ -15,6 +16,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True, slug_field='username',
     )
+
+    def validate(self, data):
+        author = self.context['request'].user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        if self.context['request'].method == 'POST':
+            current = Review.objects.filter(author=author, title_id=title_id)
+            if current.first():
+                raise ValidationError("Запрещено оставлять два отзыва на одно"
+                                      "произведение!")
+        return data
 
     class Meta:
         model = Review
@@ -53,10 +64,10 @@ class TitleSerializer(serializers.ModelSerializer):
         required=False, many=True,
         slug_field='slug'
     )
-    category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(),
-        required=False, many=True,
-        slug_field='slug')
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            required=False,
+                                            slug_field='slug'
+                                            )
 
     class Meta:
         model = Title
@@ -116,6 +127,7 @@ class TokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализует данные пользователя."""
+
     username = serializers.CharField(
         max_length=settings.LIMIT_USERNAME,
         required=True,
