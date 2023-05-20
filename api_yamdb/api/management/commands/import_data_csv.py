@@ -47,11 +47,11 @@ class Command(BaseCommand):
                         model.objects.create(**row)
                 self.stdout.write(
                     self.style.SUCCESS(
-                    f'Данные из файла {csv_file} импортированы'
-                    f'в БД {model.__name__}.'
+                        f'Данные из файла {csv_file} импортированы'
+                        f'в БД {model.__name__}.'
                     )
                 )
-        
+
         for model, csv_file in MODELS_CSV.items():
             csv_file_path = Path(path_to_csv_directory) / csv_file
             import_csv(model, csv_file, csv_file_path)
