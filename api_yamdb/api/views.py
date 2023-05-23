@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
@@ -63,7 +64,6 @@ class CategoryViewSet(CLDslugViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = PageNumberPagination
-    search_fields = ('name',)
 
 
 class GenreViewSet(CLDslugViewSet):
@@ -72,12 +72,14 @@ class GenreViewSet(CLDslugViewSet):
 
 
 class TitleViewSet(PutNoViewSet):
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).all().order_by('pk')
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     pagination_class = PageNumberPagination
     filterset_class = TitleFilter
-    queryset = Title.objects.all()
+
     search_fields = ('name', 'queryset')
 
     def get_serializer_class(self):
