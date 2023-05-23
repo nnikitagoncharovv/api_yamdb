@@ -124,17 +124,21 @@ def registration(request):
         if with_username.email != email:
             raise ValidationError("пользователь с таким username"
                                   "уже существует")
-    current = User.objects.filter(email=email, username=username).first()
-    if not current:
-        serializer.save()
-        current = User.objects.filter(email=email, username=username).first()
-    confirmation_code = default_token_generator.make_token(current)
-    send_mail(
-        subject='Регистрация на сайте YaMDb',
-        message=f'Ваш код подтверждения: {confirmation_code}',
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[email]
+    user, _ = User.objects.get_or_create(
+        username=serializer.data["username"],
+        email=serializer.data["email"]
     )
+
+    confirmation_code = default_token_generator.make_token(user)
+
+    send_mail(
+        subject="Регистрация на YaMDb",
+        message=f"Ваш код активации: {confirmation_code}",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False
+    )
+
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
