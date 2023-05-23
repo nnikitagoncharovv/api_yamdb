@@ -87,14 +87,9 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Произведение не может быть из будущего!')
         return value
 
+
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        representation['category'] = CategorySerializer(
-            instance=instance.category, read_only=True
-        ).data
-        representation["genre"] = GenreSerializer(
-            instance=instance.genre, read_only=True, many=True
-        ).data
+        representation = TitleRetriveSerializer(instance).data
         return representation
 
 
