@@ -87,7 +87,6 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Произведение не может быть из будущего!')
         return value
 
-
     def to_representation(self, instance):
         representation = TitleRetriveSerializer(instance).data
         return representation
